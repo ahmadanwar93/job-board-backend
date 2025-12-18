@@ -9,4 +9,20 @@ class Application extends Model
 {
     /** @use HasFactory<\Database\Factories\ApplicationFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'job_listing_id',
+        'user_id',
+        'message',
+    ];
+
+    public function jobListing()
+    {
+        return $this->belongsTo(JobListing::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

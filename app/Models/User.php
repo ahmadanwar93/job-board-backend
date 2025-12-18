@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role'
     ];
 
     /**
@@ -43,7 +46,28 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password' => 'hashed', // for auto hashing when saving password
+            'role' => UserRole::class
         ];
+    }
+
+    public function jobs()
+    {
+        return $this->hasMany(JobListing::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
+    }
+
+    public function scopeEmployers($query)
+    {
+        return $query->where('role', UserRole::EMPLOYER);
+    }
+
+    public function scopeApplicants($query)
+    {
+        return $query->where('role', UserRole::APPLICANT);
     }
 }

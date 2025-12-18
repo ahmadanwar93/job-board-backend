@@ -11,9 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $table) {
+        Schema::create('job_listings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('title');
+            $table->text('description');
+            $table->string('location');
+            $table->string('salary_range', 100);
+            $table->boolean('is_remote')->default(false);
+            $table->string('status')->default('draft');
             $table->timestamps();
+
+            $table->index('status');
+            $table->index('user_id');
         });
     }
 
