@@ -24,7 +24,7 @@ class ApplicationRejected extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -49,7 +49,10 @@ class ApplicationRejected extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'application_rejected',
+            'message' => "Your application for {$this->application->jobListing->title} was not successful",
+            'job_id' => $this->application->job_listing_id,
+            'application_id' => $this->application->id,
         ];
     }
 }

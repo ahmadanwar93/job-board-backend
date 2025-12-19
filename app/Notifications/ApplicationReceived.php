@@ -24,7 +24,7 @@ class ApplicationReceived extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -51,7 +51,10 @@ class ApplicationReceived extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'application_received',
+            'message' => "{$this->application->user->name} applied for {$this->application->jobListing->title}",
+            'job_id' => $this->application->job_listing_id,
+            'application_id' => $this->application->id,
         ];
     }
 }
