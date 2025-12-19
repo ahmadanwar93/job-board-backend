@@ -16,6 +16,13 @@ class Application extends Model
         'message',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'viewed_at' => 'datetime',
+        ];
+    }
+
     public function jobListing()
     {
         return $this->belongsTo(JobListing::class);

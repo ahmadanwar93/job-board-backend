@@ -24,4 +24,10 @@ class ApplicationPolicy
     {
         return $user->role === UserRole::APPLICANT;
     }
+
+    public function markAsViewed(User $user, Application $application): bool
+    {
+        return $user->role === UserRole::EMPLOYER
+            && $user->id === $application->jobListing->user_id;
+    }
 }
