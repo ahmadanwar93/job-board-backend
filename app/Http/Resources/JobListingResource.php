@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -28,14 +29,18 @@ class JobListingResource extends JsonResource
             ],
             'created_at' => $this->created_at->toISOString(),
             'has_applied' => $this->when(
-                $request->user()?->role === 'applicant',
-                fn() => $this->applications()->where('user_id', $request->user()->id)->exists()
+                $request->user()?->role === UserRole::APPLICANT,
+                fn() => $this->applications->isNotEmpty()
             ),
-            // TODO: can we eager loading count here?
-            'applications_count' => $this->when(
-                $request->user()?->id === $this->user_id,
-                fn() => $this->applications_count ?? $this->applications()->count()
+            'my_application' => $this->when(
+                $request->user()?->role === UserRole::APPLICANT && $this->applications->isNotEmpty(),
+                fn() => [
+                    'status' => $this->applications->first()->status->value,
+                    'message' => $this->applications->first()->message,
+                    'viewed_at' => $this->applications->first()->viewed_at?->toISOString(),
+                ]
             ),
+            'applications_count' => $this->applications_count
         ];
     }
 }

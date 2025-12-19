@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApplicationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +21,7 @@ class Application extends Model
     {
         return [
             'viewed_at' => 'datetime',
+            'status' => ApplicationStatus::class
         ];
     }
 

@@ -47,4 +47,11 @@ class JobListingFactory extends Factory
             'status' => JobListingStatus::DRAFT,
         ]);
     }
+
+    public function closed(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'status' => JobListingStatus::CLOSED,
+        ]);
+    }
 }
