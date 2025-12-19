@@ -2,26 +2,42 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\JobListingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreJobListingRequest;
 use App\Http\Requests\UpdateJobListingRequest;
 use App\Http\Resources\JobListingResource;
 use App\Models\JobListing;
+use App\Policies\JobListingPolicy;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EmployerJobListingController extends Controller
 {
     use AuthorizesRequests;
     public function index(Request $request)
     {
-        $this->authorize('viewAny');
+        // has to pass in the second argument because of name convention
+        $this->authorize('viewAny', JobListing::class);
 
-        $jobListings = JobListing::with('user')
+        $validated = $request->validate([
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'status' => ['sometimes', 'string', Rule::in(JobListingStatus::values())],
+        ]);
+
+        $perPage = $validated['per_page'] ?? 15;
+
+        $query = JobListing::query()
+            ->with('user')
             ->withCount('applications')
-            ->forEmployer($request->user()->id)
-            ->latest()
-            ->get();
+            ->forEmployer($request->user()->id);
+
+        if (isset($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        $jobListings = $query->latest()->paginate($perPage);
 
         return JobListingResource::collection($jobListings);
     }
@@ -43,7 +59,7 @@ class EmployerJobListingController extends Controller
 
     public function show(JobListing $jobListing)
     {
-        $this->authorize('show', JobListing::class);
+        $this->authorize('view', $jobListing);
         $jobListing->load('user');
         $jobListing->loadCount('applications');
 
@@ -52,7 +68,7 @@ class EmployerJobListingController extends Controller
 
     public function update(UpdateJobListingRequest $request, JobListing $jobListing)
     {
-        $this->authorize('update', JobListing::class);
+        $this->authorize('update', $jobListing);
         $jobListing->update($request->validated());
         $jobListing->load('user');
 
@@ -61,7 +77,7 @@ class EmployerJobListingController extends Controller
 
     public function destroy(JobListing $jobListing)
     {
-        $this->authorize('delete', JobListing::class);
+        $this->authorize('delete', $jobListing);
         $jobListing->delete();
 
         return response()->json([
