@@ -4,8 +4,11 @@ namespace Tests\Feature\Api;
 
 use App\Models\JobListing;
 use App\Models\User;
+use App\Notifications\ApplicationReceived;
+use App\Notifications\ApplicationRejected;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class EmployerJobManagementTest extends TestCase
@@ -266,5 +269,123 @@ class EmployerJobManagementTest extends TestCase
         $this->assertDatabaseHas('job_listings', [
             'id' => $job->id,
         ]);
+    }
+
+    public function test_employer_can_mark_application_as_viewed(): void
+    {
+        $employer = User::factory()->employer()->create();
+        $applicant = User::factory()->applicant()->create();
+
+        $job = JobListing::factory()->published()->create(['user_id' => $employer->id]);
+
+        $application = $job->applications()->create([
+            'user_id' => $applicant->id,
+            'message' => str_repeat('Application. ', 10),
+        ]);
+
+        $this->assertNull($application->viewed_at);
+
+        $response = $this->actingAs($employer, 'sanctum')
+            ->postJson("/api/employer/applications/{$application->id}/view");
+        $response->assertOk()
+            ->assertJsonPath('data.id', $application->id)
+            ->assertJsonPath('data.viewed_at', fn($value) => $value !== null);
+
+        $this->assertNotNull($application->fresh()->viewed_at);
+    }
+
+    public function test_employer_can_shortlist_application(): void
+    {
+        $employer = User::factory()->employer()->create();
+        $applicant = User::factory()->applicant()->create();
+
+        $job = JobListing::factory()->published()->create(['user_id' => $employer->id]);
+
+        $application = $job->applications()->create([
+            'user_id' => $applicant->id,
+            'message' => str_repeat('Application. ', 10),
+        ]);
+
+        $response = $this->actingAs($employer, 'sanctum')
+            ->postJson("/api/employer/applications/{$application->id}/shortlist");
+
+        $response->assertOk()
+            ->assertJsonPath('data.status', 'shortlisted');
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'status' => 'shortlisted',
+        ]);
+
+        $application->refresh();
+        $this->assertNotNull($application->viewed_at);
+    }
+
+    public function test_rejecting_application_sends_email_to_applicant(): void
+    {
+        Notification::fake();
+
+        $employer = User::factory()->employer()->create();
+        $applicant = User::factory()->applicant()->create();
+
+        $job = JobListing::factory()->published()->create([
+            'user_id' => $employer->id,
+            'title' => 'Senior Developer',
+        ]);
+
+        $application = $job->applications()->create([
+            'user_id' => $applicant->id,
+            'message' => str_repeat('Application. ', 10),
+        ]);
+
+        $response = $this->actingAs($employer, 'sanctum')
+            ->postJson("/api/employer/applications/{$application->id}/reject");
+
+        $response->assertOk()
+            ->assertJsonPath('data.status', 'rejected');
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'status' => 'rejected',
+        ]);
+
+        Notification::assertSentTo(
+            $applicant,
+            ApplicationRejected::class,
+            function ($notification, $channels) use ($application) {
+                return $notification->application->id === $application->id;
+            }
+        );
+
+        $application->refresh();
+        $this->assertNotNull($application->viewed_at);
+    }
+
+    public function test_applying_to_job_sends_email_to_employer(): void
+    {
+        Notification::fake();
+
+        $employer = User::factory()->employer()->create();
+        $applicant = User::factory()->applicant()->create(['name' => 'John Applicant']);
+
+        $job = JobListing::factory()->published()->create([
+            'user_id' => $employer->id,
+            'title' => 'Backend Developer',
+        ]);
+
+        $applicationData = [
+            'message' => str_repeat('I am interested in this position. ', 10),
+        ];
+
+        $this->actingAs($applicant, 'sanctum')
+            ->postJson("/api/jobs/{$job->id}/applications", $applicationData);
+
+        Notification::assertSentTo(
+            $employer,
+            ApplicationReceived::class,
+            function ($notification) use ($applicant) {
+                return $notification->application->user_id === $applicant->id;
+            }
+        );
     }
 }

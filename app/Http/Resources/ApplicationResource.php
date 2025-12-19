@@ -18,8 +18,8 @@ class ApplicationResource extends JsonResource
         return [
             'id' => $this->id,
             'message' => $this->message,
-            'created_at' => $this->created_at->toISOString(),
-            'viewed_at' => $this->viewed_at?->toISOString(),
+            'created_at' => $this->created_at->diffForHumans(),
+            'viewed_at' => $this->viewed_at?->diffForHumans(),
             'status' => $this->status,
             'job' => $this->when(
                 $request->user()?->role === UserRole::APPLICANT,
