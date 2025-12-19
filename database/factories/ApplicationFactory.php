@@ -23,6 +23,7 @@ class ApplicationFactory extends Factory
             'job_listing_id' => JobListing::factory()->published(),
             'user_id' => User::factory()->applicant(),
             'message' => fake()->paragraphs(3, true),
+            'status' => 'applied'
         ];
     }
 }

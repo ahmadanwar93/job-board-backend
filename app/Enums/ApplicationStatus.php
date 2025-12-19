@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum ApplicationStatus: string
 {
-    case PENDING = 'pending';
+    case APPLIED = 'applied';
     case SHORTLISTED = 'shortlisted';
     case REJECTED = 'rejected';
 

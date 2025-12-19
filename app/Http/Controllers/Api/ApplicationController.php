@@ -29,7 +29,7 @@ class ApplicationController extends Controller
 
         if ($jobListing->applications()->where('user_id', $request->user()->id)->exists()) {
             return response()->json([
-                'message' => 'Already applied to this job'
+                'message' => 'You have already applied to this job'
             ], 409);
         }
 
@@ -37,6 +37,7 @@ class ApplicationController extends Controller
             'job_listing_id' => $jobListing->id,
             'user_id' => $request->user()->id,
             'message' => $request->message,
+            'status' => ApplicationStatus::APPLIED
         ]);
 
         // TODO: double check frontend if needed this or not. I am thinking to just always load

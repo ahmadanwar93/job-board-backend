@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,8 +20,9 @@ class ApplicationResource extends JsonResource
             'message' => $this->message,
             'created_at' => $this->created_at->toISOString(),
             'viewed_at' => $this->viewed_at?->toISOString(),
+            'status' => $this->status,
             'job' => $this->when(
-                $request->user()?->role === 'applicant',
+                $request->user()?->role === UserRole::APPLICANT,
                 fn() => [
                     'id' => $this->jobListing->id,
                     'title' => $this->jobListing->title,
@@ -29,7 +31,7 @@ class ApplicationResource extends JsonResource
                 ]
             ),
             'applicant' => $this->when(
-                $request->user()?->role === 'employer',
+                $request->user()?->role === UserRole::EMPLOYER,
                 fn() => [
                     'id' => $this->user->id,
                     'name' => $this->user->name,

@@ -134,7 +134,7 @@ class PublicJobListingTest extends TestCase
 
         $job = JobListing::factory()->published()->create(['user_id' => $employer->id]);
 
-        $application = $job->applications()->create([
+        $job->applications()->create([
             'user_id' => $applicant->id,
             'message' => 'My application message',
         ]);
@@ -146,7 +146,7 @@ class PublicJobListingTest extends TestCase
             ->assertJsonPath('data.has_applied', true)
             ->assertJsonPath('data.my_application.message', 'My application message')
             ->assertJsonPath('data.my_application.viewed_at', null)
-            ->assertJsonPath('data.my_application.status', 'pending');
+            ->assertJsonPath('data.my_application.status', 'applied');
     }
 
     public function test_viewing_nonexistent_job_returns_404(): void

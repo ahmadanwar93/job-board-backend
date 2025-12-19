@@ -15,6 +15,7 @@ class Application extends Model
         'job_listing_id',
         'user_id',
         'message',
+        'status'
     ];
 
     protected function casts(): array

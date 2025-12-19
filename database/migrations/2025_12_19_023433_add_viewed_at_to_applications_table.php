@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('applications', function (Blueprint $table) {
             $table->timestamp('viewed_at')->nullable();
-            $table->string('status')->default('pending'); // pending, shortlisted, rejected
+            $table->string('status')->default('applied'); // applied, shortlisted, rejected
         });
     }
 
