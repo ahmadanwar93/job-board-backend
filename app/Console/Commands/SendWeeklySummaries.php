@@ -33,44 +33,51 @@ class SendWeeklySummaries extends Command
     {
         $weekAgo = now()->subWeek();
 
-        $applicants = User::applicants()->get();
+        $applicants = User::applicants()
+            ->whereHas('applications', function ($query) use ($weekAgo) {
+                $query->where('created_at', '>=', $weekAgo);
+            })
+            ->with(['applications' => function ($query) use ($weekAgo) {
+                $query->where('created_at', '>=', $weekAgo);
+            }])
+            ->get();
 
-        // TODO: make it eager loading
         foreach ($applicants as $applicant) {
-            $applications = Application::where('user_id', $applicant->id)
-                ->where('created_at', '>=', $weekAgo)
-                ->get();
+            $applications = $applicant->applications;
 
             $applicationsCount = $applications->count();
             $viewedCount = $applications->whereNotNull('viewed_at')->count();
             $shortlistedCount = $applications->where('status', ApplicationStatus::SHORTLISTED)->count();
             $rejectedCount = $applications->where('status', ApplicationStatus::REJECTED)->count();
 
-            if ($applicationsCount > 0) {
-                $applicant->notify(new WeeklyApplicantSummary(
-                    $applicationsCount,
-                    $viewedCount,
-                    $shortlistedCount,
-                    $rejectedCount
-                ));
-            }
+            $applicant->notify(new WeeklyApplicantSummary(
+                $applicationsCount,
+                $viewedCount,
+                $shortlistedCount,
+                $rejectedCount
+            ));
         }
 
-        $this->info('Sent summaries to ' . $applicants->count() . ' applicants');
+        $this->info("Sent summaries to {$applicants->count()} applicants");
 
         // Send to employers
-        $employers = User::employers()->get();
+        $employers = User::employers()
+            ->where(function ($query) use ($weekAgo) {
+                $query->whereHas('jobs', function ($q) use ($weekAgo) {
+                    $q->where('created_at', '>=', $weekAgo);
+                })->orWhereHas('jobs.applications', function ($q) use ($weekAgo) {
+                    $q->where('created_at', '>=', $weekAgo);
+                });
+            })
+            ->with([
+                'jobs' => fn($q) => $q->where('created_at', '>=', $weekAgo),
+                'jobs.applications' => fn($q) => $q->where('created_at', '>=', $weekAgo)
+            ])
+            ->get();
 
         foreach ($employers as $employer) {
-            $jobsPosted = JobListing::where('user_id', $employer->id)
-                ->where('created_at', '>=', $weekAgo)
-                ->count();
-
-            $jobIds = JobListing::where('user_id', $employer->id)->pluck('id');
-
-            $applications = Application::whereIn('job_listing_id', $jobIds)
-                ->where('created_at', '>=', $weekAgo)
-                ->get();
+            $jobsPosted = $employer->jobs->count();
+            $applications = $employer->jobs->flatMap->applications;
 
             $applicationsReceived = $applications->count();
             $applicationsViewed = $applications->whereNotNull('viewed_at')->count();

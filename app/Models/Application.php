@@ -16,7 +16,8 @@ class Application extends Model
         'user_id',
         'message',
         'status',
-        'viewed_at'
+        'viewed_at',
+        'created_at'
     ];
 
     protected function casts(): array

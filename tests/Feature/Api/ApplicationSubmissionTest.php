@@ -26,7 +26,6 @@ class ApplicationSubmissionTest extends TestCase
 
         $response = $this->actingAs($applicant, 'sanctum')
             ->postJson("/api/jobs/{$job->id}/applications", $applicationData);
-        dd($response);
         $response->assertCreated()
             ->assertJsonStructure([
                 'data' => [
