@@ -33,7 +33,7 @@ class SendWeeklySummaries extends Command
     {
         $weekAgo = now()->subWeek();
 
-        $applicants = User::applicants()
+        $applicants = User::applicants()->whereNotNull('email_verified_at')
             ->whereHas('applications', function ($query) use ($weekAgo) {
                 $query->where('created_at', '>=', $weekAgo);
             })
@@ -61,7 +61,7 @@ class SendWeeklySummaries extends Command
         $this->info("Sent summaries to {$applicants->count()} applicants");
 
         // Send to employers
-        $employers = User::employers()
+        $employers = User::employers()->whereNotNull('email_verified_at')
             ->where(function ($query) use ($weekAgo) {
                 $query->whereHas('jobs', function ($q) use ($weekAgo) {
                     $q->where('created_at', '>=', $weekAgo);

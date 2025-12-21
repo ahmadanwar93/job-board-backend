@@ -37,6 +37,7 @@ class WeeklyEmployerSummary extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $frontendUrl = config('app.frontend_url') . '/dashboard';
         return (new MailMessage)
             ->subject('Your Weekly Job Posting Summary')
             ->greeting('Hello ' . $notifiable->name . '!')
@@ -46,7 +47,7 @@ class WeeklyEmployerSummary extends Notification implements ShouldQueue
             ->line('**Applications viewed:** ' . $this->applicationsViewed)
             ->line('**Applications shortlisted:** ' . $this->applicationsShortlisted)
             ->line('**Applications rejected:** ' . $this->applicationsRejected)
-            ->action('View Your Jobs', url('/employer/jobs'))
+            ->action('View all applications', $frontendUrl)
             ->line('Thank you for using our platform!');
     }
 

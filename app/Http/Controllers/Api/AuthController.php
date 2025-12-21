@@ -15,6 +15,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         $user = User::create($request->validated());
+        $user->sendEmailVerificationNotification();
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
@@ -33,7 +34,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user();
+        $user = User::where('email', $request->email)->first();
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -58,6 +59,20 @@ class AuthController extends Controller
     {
         return response()->json([
             'data' => new UserResource($request->user())
+        ]);
+    }
+    public function resendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email already verified'
+            ], 400);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json([
+            'message' => 'Verification link sent to your email'
         ]);
     }
 }

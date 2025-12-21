@@ -32,6 +32,7 @@ class ApplicationReceived extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $frontendUrl = config('app.frontend_url') . '/dashboard';
         return (new MailMessage)
             ->subject('New Application Received')
             ->greeting('Hello ' . $notifiable->name . '!')
@@ -39,7 +40,7 @@ class ApplicationReceived extends Notification implements ShouldQueue
             ->line('**Job:** ' . $this->application->jobListing->title)
             ->line('**Applicant:** ' . $this->application->user->name)
             ->line('**Applied on:** ' . $this->application->created_at->format('F j, Y'))
-            ->action('View Application', url('/employer/jobs/' . $this->application->jobListing->id . '/applications'))
+            ->action('View Application', $frontendUrl)
             ->line('Thank you for using our job board!');
     }
 

@@ -32,13 +32,16 @@ class ApplicationRejected extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $jobTitle = $this->application->jobListing->title;
+        $companyName = $this->application->jobListing->user->name;
+
         return (new MailMessage)
-            ->subject('Application Update - ' . $this->application->jobListing->title)
+            ->subject('Application Update - ' . $jobTitle)
             ->greeting('Hello ' . $notifiable->name . ',')
-            ->line('Thank you for your interest in the position: **' . $this->application->jobListing->title . '**')
+            ->line('Thank you for your interest in the **' . $jobTitle . '** position at **' . $companyName . '**.')
             ->line('After careful consideration, we have decided to move forward with other candidates.')
             ->line('We appreciate the time you took to apply and wish you the best in your job search.')
-            ->line('Company: ' . $this->application->jobListing->user->name);
+            ->salutation('');
     }
 
     /**

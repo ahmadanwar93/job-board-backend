@@ -41,10 +41,11 @@ class ApplicationController extends Controller
             'status' => ApplicationStatus::APPLIED
         ]);
 
-        // TODO: double check frontend if needed this or not. I am thinking to just always load
         $application->load(['jobListing.user']);
 
-        $jobListing->user->notify(new ApplicationReceived($application));
+        if ($jobListing->user->hasVerifiedEmail()) {
+            $jobListing->user->notify(new ApplicationReceived($application));
+        }
 
         return response()->json([
             'data' => new ApplicationResource($application)
@@ -109,7 +110,10 @@ class ApplicationController extends Controller
 
         $application->load(['jobListing.user', 'user']);
 
-        $application->user->notify(new ApplicationRejected($application));
+        if ($application->user->hasVerifiedEmail()) {
+            $application->user->notify(new ApplicationRejected($application));
+        }
+
 
         return new ApplicationResource($application);
     }
