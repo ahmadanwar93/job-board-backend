@@ -21,8 +21,8 @@ class NotificationController extends Controller
                 'message' => $n->data['message'],
                 'job_id' => $n->data['job_id'],
                 'application_id' => $n->data['application_id'] ?? null,
-                'read_at' => $n->read_at?->toISOString(),
-                'created_at' => $n->created_at->toISOString(),
+                'read_at' => $n->read_at?->diffForHumans(),
+                'created_at' => $n->created_at->diffForHumans(),
             ]),
             'unread_count' => $request->user()->unreadNotifications()->count(),
         ]);
