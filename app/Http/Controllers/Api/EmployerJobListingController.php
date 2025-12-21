@@ -26,7 +26,7 @@ class EmployerJobListingController extends Controller
             'status' => ['sometimes', 'string', Rule::in(JobListingStatus::values())],
         ]);
 
-        $perPage = $validated['per_page'] ?? 15;
+        $perPage = $validated['per_page'] ?? 5;
 
         $query = JobListing::query()
             ->with('user')

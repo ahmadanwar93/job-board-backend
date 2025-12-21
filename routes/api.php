@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/jobs/{jobListing}', [EmployerJobListingController::class, 'destroy']);
 
         // for employment management
+        Route::get('/job-listing', [ApplicationController::class, 'jobListing']);
         Route::get('/jobs/{jobListing}/applications', [ApplicationController::class, 'forJob']);
         Route::post('/applications/{application}/view', [ApplicationController::class, 'markAsViewed']);
         Route::post('/applications/{application}/shortlist', [ApplicationController::class, 'shortlist']);

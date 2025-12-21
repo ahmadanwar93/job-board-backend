@@ -7,6 +7,7 @@ use App\Enums\JobListingStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Resources\ApplicationResource;
+use App\Http\Resources\JobDropdownResource;
 use App\Models\Application;
 use App\Models\JobListing;
 use App\Notifications\ApplicationReceived;
@@ -111,5 +112,21 @@ class ApplicationController extends Controller
         $application->user->notify(new ApplicationRejected($application));
 
         return new ApplicationResource($application);
+    }
+
+    public function jobListing(Request $request)
+    {
+        $this->authorize('viewAny', JobListing::class);
+
+        $jobListings = JobListing::query()
+            ->with([
+                'user',
+                'applications.user'
+            ])
+            ->withCount('applications')
+            ->forEmployer($request->user()->id)
+            ->get();
+
+        return JobDropdownResource::collection($jobListings);
     }
 }

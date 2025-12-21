@@ -27,17 +27,17 @@ class JobListingResource extends JsonResource
                 'id' => $this->user_id,
                 'name' => $this->user->name,
             ],
-            'created_at' => $this->created_at->toISOString(),
+            'created_at' => $this->created_at->diffForHumans(),
             'has_applied' => $this->when(
                 $request->user()?->role === UserRole::APPLICANT,
-                fn() => $this->applications->isNotEmpty()
+                fn() => $this->applications->diffForHumans()
             ),
             'my_application' => $this->when(
                 $request->user()?->role === UserRole::APPLICANT && $this->applications->isNotEmpty(),
                 fn() => [
                     'status' => $this->applications->first()->status->value,
                     'message' => $this->applications->first()->message,
-                    'viewed_at' => $this->applications->first()->viewed_at?->toISOString(),
+                    'viewed_at' => $this->applications->first()->viewed_at?->diffForHumans(),
                 ]
             ),
             'applications_count' => $this->applications_count
