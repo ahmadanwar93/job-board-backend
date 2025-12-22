@@ -1,60 +1,22 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+**Tech Stack**
+php, laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Instructions**
 
-## About Laravel
+1. Fill in .env using .env.example as template
+2. Run `php artisan db:seed` to seed fake data initially for testing.
+3. Run `php artisan queue:work` for asynchronous email sending (use queue_connection = sync otherwise).
+4. Run `php artisan schedule:work` for testing the weekly email summary. Can also trigger using `php artisan app:send-weekly-summaries` with no scheduler daemon.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**My thoughts**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# job-board-backend
+1. For feature tests, I covered almost all API endpoints except the last few like upload and download resume due to time constraints. I also did not completely test all request validation for POST APIs. I assumed that should be tested in unit tests rather than feature tests.
+2. For the upload and download resume features, I did not implement presigned URLs due to time constraints. I used the Laravel server as a proxy server, which is not ideal.
+3. For notifications, I implemented polling from the frontend instead of WebSockets due to time constraints.
+4. Email verification should be done asynchronously, but I implemented it synchronously here.
+5. In terms of database design, several aspects could be improved:
+    - `salary_range` in job_listings should be split into two numeric columns to prevent nonsense values. Currently it's just a string.
+    - For job_listing, more logic should govern status changes. For example, users shouldn't be able to change status or details once published to prevent fraudulent advertisements.
+    - In the users table, I included `resume_path` and `can_upload` fields. The idea is that not all users can upload resumes because the initial plan used my personal R2 bucket. I would manually change the flag during demonstrations. For `resume_path`, it would be better as a separate table with a one-to-many relationship from users. This trades higher storage costs for the benefit of maintaining user resume history.
+    - For the applications table, more logic should govern status changes. For example, rejected applications should not be able to be shortlisted again. A status change log would be beneficial so users can see timestamps of status transitions.
+6. Reset password feature should be implemented as well.
