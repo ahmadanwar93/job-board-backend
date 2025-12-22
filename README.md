@@ -3,10 +3,11 @@ php, laravel
 
 **Instructions**
 
-1. Fill in .env using .env.example as template
-2. Run `php artisan db:seed` to seed fake data initially for testing.
-3. Run `php artisan queue:work` for asynchronous email sending (use queue_connection = sync otherwise).
-4. Run `php artisan schedule:work` for testing the weekly email summary. Can also trigger using `php artisan app:send-weekly-summaries` with no scheduler daemon.
+1. Fill in .env using .env.example as template.
+2. Create Resend account for email, and r2 bucket for resume upload and download.
+3. Run `php artisan db:seed` to seed fake data initially for testing.
+4. Run `php artisan queue:work` for asynchronous email sending (use queue_connection = sync otherwise).
+5. Run `php artisan schedule:work` for testing the weekly email summary. Can also trigger using `php artisan app:send-weekly-summaries` with no scheduler daemon.
 
 **My thoughts**
 
