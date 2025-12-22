@@ -19,7 +19,9 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role,
-            'email_verified' => $this->hasVerifiedEmail()
+            'email_verified' => $this->hasVerifiedEmail(),
+            'can_upload' => (bool) $this->can_upload,
+            'has_resume' => !is_null($this->resume_path),
         ];
     }
 }

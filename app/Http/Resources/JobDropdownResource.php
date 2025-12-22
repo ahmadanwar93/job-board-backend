@@ -28,6 +28,7 @@ class JobDropdownResource extends JsonResource
                     'status' => $application->status->value,
                     'created_at' => $application->created_at->diffForHumans(),
                     'viewed_at' => $application->viewed_at?->diffForHumans(),
+                    'has_resume' => !is_null($application->user->resume_path),
                 ];
             }),
         ];

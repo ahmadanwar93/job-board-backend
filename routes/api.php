@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmployerJobListingController;
 use App\Http\Controllers\Api\JobListingController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\ResumeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,6 +32,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/jobs/{jobListing}/applications', [ApplicationController::class, 'store']);
     Route::get('/my-applications', [ApplicationController::class, 'index']);
 
+    // resume
+    Route::post('/resume/upload', [ResumeController::class, 'upload']);
+    Route::get('/resume/download', [ResumeController::class, 'download']);
+
     Route::prefix('employer')->group(function () {
         Route::get('/jobs', [EmployerJobListingController::class, 'index']);
         Route::post('/jobs', [EmployerJobListingController::class, 'store']);
@@ -44,5 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/applications/{application}/view', [ApplicationController::class, 'markAsViewed']);
         Route::post('/applications/{application}/shortlist', [ApplicationController::class, 'shortlist']);
         Route::post('/applications/{application}/reject', [ApplicationController::class, 'reject']);
+        Route::get('/jobs/{jobListing}/applications/{application}/resume', [ResumeController::class, 'downloadApplicantResume']);
     });
 });

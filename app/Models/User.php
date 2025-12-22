@@ -25,7 +25,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'resume_path'
     ];
 
     /**
@@ -48,7 +49,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed', // for auto hashing when saving password
-            'role' => UserRole::class
+            'role' => UserRole::class,
         ];
     }
 
